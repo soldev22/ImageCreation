@@ -49,7 +49,6 @@ export default function HomePage() {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         rows={3}
-        style={styles.textarea}
         placeholder="e.g. surreal, twilight, forest, radiant"
       />
 

@@ -29,9 +29,6 @@ const defaultAnswers = [
   'A giant tree carved with stories of my life',
 ];
 
-export async function GET() {
-  return Response.json({ message: 'This endpoint only accepts POST requests.' }, { status: 405 });
-}
 
 
 export default function HomePage() {

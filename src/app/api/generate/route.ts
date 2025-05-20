@@ -3,6 +3,14 @@ import OpenAI from 'openai';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Just to avoid Vercel GET 405 confusion
+export async function GET() {
+  return NextResponse.json(
+    { message: 'This endpoint only supports POST. Use POST with JSON body.' },
+    { status: 405 }
+  );
+}
+
 export async function POST(req: Request) {
   try {
     const { answers } = await req.json();

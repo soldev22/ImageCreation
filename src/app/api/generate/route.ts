@@ -7,17 +7,21 @@ export async function POST(req: Request) {
   try {
     const { answers } = await req.json();
 
-    const cleanedAnswers = answers
-      .map((a) =>
+    if (!Array.isArray(answers)) {
+      return NextResponse.json({ error: 'Invalid input: answers must be an array' }, { status: 400 });
+    }
+
+    const cleanedAnswers = (answers as string[])
+      .map((a: string) =>
         a
           .trim()
           .replace(/\s+/g, ' ')
           .replace(/[^\w\s.,!?'"()-]/g, '')
           .slice(0, 100)
       )
-      .filter((a) => a.length > 3);
+      .filter((a: string) => a.length > 3);
 
-    const prompt = `Create an abstract ,  image based on: ${cleanedAnswers.join(', ')}. Emotionally expressive and dreamlike.`;
+    const prompt = `Create an abstract, image based on: ${cleanedAnswers.join(', ')}. Emotionally expressive and dreamlike.`;
 
     console.log('🎯 Using GPT-4 tool call with prompt:', prompt);
 
@@ -55,7 +59,6 @@ export async function POST(req: Request) {
     const toolCall = response.choices[0]?.message?.tool_calls?.[0];
     const imageArgs = JSON.parse(toolCall?.function.arguments || '{}');
 
-    // Simulate the tool function — actually generate the image now
     const imageResponse = await openai.images.generate({
       model: 'dall-e-3',
       prompt: imageArgs.prompt,

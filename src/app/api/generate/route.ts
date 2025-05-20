@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
-// Just to avoid Vercel GET 405 confusion
 export async function GET() {
   return NextResponse.json(
-    { message: 'This endpoint only supports POST. Use POST with JSON body.' },
+    { message: 'POST to this endpoint with an array of descriptive words.' },
     { status: 405 }
   );
 }
@@ -15,11 +16,14 @@ export async function POST(req: Request) {
   try {
     const { answers } = await req.json();
 
-    if (!Array.isArray(answers)) {
-      return NextResponse.json({ error: 'Invalid input: answers must be an array' }, { status: 400 });
+    if (!Array.isArray(answers) || !answers.length) {
+      return NextResponse.json(
+        { error: 'Invalid input. Expected non-empty array.' },
+        { status: 400 }
+      );
     }
 
-    const cleanedAnswers = (answers as string[])
+    const cleanedAnswers = answers
       .map((a: string) =>
         a
           .trim()
@@ -29,9 +33,9 @@ export async function POST(req: Request) {
       )
       .filter((a: string) => a.length > 3);
 
-    const prompt = `Create an abstract, image based on: ${cleanedAnswers.join(', ')}. Emotionally expressive and dreamlike.`;
+    const prompt = `Create an abstract, emotionally expressive image based on: ${cleanedAnswers.join(', ')}.`;
 
-    console.log('🎯 Using GPT-4 tool call with prompt:', prompt);
+    console.log('🎯 Prompt:', prompt);
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4-turbo',
@@ -64,7 +68,7 @@ export async function POST(req: Request) {
       },
     });
 
-    const toolCall = response.choices[0]?.message?.tool_calls?.[0];
+    const toolCall = response.choices?.[0]?.message?.tool_calls?.[0];
     const imageArgs = JSON.parse(toolCall?.function.arguments || '{}');
 
     const imageResponse = await openai.images.generate({
@@ -75,10 +79,11 @@ export async function POST(req: Request) {
     });
 
     const imageUrl = imageResponse.data?.[0]?.url;
+    console.log('🖼️ Image URL:', imageUrl);
 
     return NextResponse.json({ imageUrl });
   } catch (err: any) {
-    console.error('💥 GPT-4 Tool/Image Error:', JSON.stringify(err, null, 2));
+    console.error('💥 Error in /api/generate:', err);
     return NextResponse.json({ error: 'Image generation failed' }, { status: 500 });
   }
 }

@@ -166,3 +166,174 @@ a.secondary {
     filter: invert();
   }
 }
+
+.waitingOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1055;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    linear-gradient(rgba(13, 18, 24, 0.86), rgba(13, 18, 24, 0.94)),
+    repeating-linear-gradient(135deg, transparent 0 24px, rgba(255, 255, 255, 0.025) 24px 25px);
+  backdrop-filter: blur(10px);
+  animation: overlayIn 240ms ease-out both;
+}
+
+.waitingModal {
+  width: min(100%, 480px);
+  overflow: hidden;
+  padding: 40px;
+  color: #f7f4ed;
+  text-align: center;
+  background: #171d22;
+  border: 1px solid rgba(240, 197, 93, 0.42);
+  border-radius: 8px;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.44);
+  animation: modalIn 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.orbit {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 26px;
+  border: 1px solid rgba(242, 199, 94, 0.32);
+  border-radius: 50%;
+  animation: orbitSpin 3.5s linear infinite;
+}
+
+.orbit::before,
+.orbit::after {
+  position: absolute;
+  content: '';
+  border-radius: 50%;
+}
+
+.orbit::before {
+  top: -5px;
+  left: 31px;
+  width: 12px;
+  height: 12px;
+  background: #f2c75e;
+  box-shadow: 0 0 22px rgba(242, 199, 94, 0.8);
+}
+
+.orbit::after {
+  right: 7px;
+  bottom: 5px;
+  width: 8px;
+  height: 8px;
+  background: #64d8d3;
+  box-shadow: 0 0 18px rgba(100, 216, 211, 0.72);
+}
+
+.orbitCore {
+  position: absolute;
+  inset: 22px;
+  display: block;
+  background: #e46f59;
+  border-radius: 50%;
+  box-shadow: 0 0 30px rgba(228, 111, 89, 0.46);
+  animation: corePulse 1.8s ease-in-out infinite;
+}
+
+.eyebrow {
+  margin-bottom: 10px;
+  color: #f2c75e;
+  font-family: var(--font-geist-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.waitingTitle {
+  margin-bottom: 14px;
+  font-family: var(--font-geist-sans);
+  font-size: clamp(28px, 7vw, 38px);
+  font-weight: 650;
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.waitingMessage {
+  min-height: 48px;
+  margin-bottom: 24px;
+  color: #c7cbd0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.timer {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-top: 16px;
+  color: #aeb5bc;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: var(--font-geist-mono);
+  font-size: 13px;
+}
+
+.timer strong {
+  color: #f7f4ed;
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+.progressTrack {
+  height: 3px;
+  margin-top: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.progressTrack span {
+  display: block;
+  width: 42%;
+  height: 100%;
+  background: #64d8d3;
+  animation: progressSweep 1.8s ease-in-out infinite;
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes orbitSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes corePulse {
+  50% { transform: scale(0.72); opacity: 0.7; }
+}
+
+@keyframes progressSweep {
+  from { transform: translateX(-110%); }
+  to { transform: translateX(340%); }
+}
+
+@media (max-width: 520px) {
+  .waitingModal {
+    padding: 32px 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .waitingOverlay,
+  .waitingModal,
+  .orbit,
+  .orbitCore,
+  .progressTrack span {
+    animation: none;
+  }
+}

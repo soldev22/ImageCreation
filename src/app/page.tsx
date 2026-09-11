@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import packageJson from '../../package.json';
+import styles from './page.module.css';
 
 const questions = [
   'What place or environment feels most like “home” to you?',
@@ -30,11 +31,39 @@ const defaultAnswers = [
   'A giant tree carved with stories of my life',
 ];
 
+const waitingMessages = [
+  'Curating the light and setting the mood.',
+  'Negotiating the finer details with the muse.',
+  'Polishing a few beautifully impossible edges.',
+  'Your masterpiece is taking the scenic route.',
+];
+
+const formatElapsedTime = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+};
+
 export default function HomePage() {
   const [formData, setFormData] = useState<string[]>(defaultAnswers);
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [error, setError] = useState('');
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  useEffect(() => {
+    if (!loading) {
+      return;
+    }
+
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      setElapsedSeconds(Math.floor((Date.now() - startedAt) / 1000));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [loading]);
 
   const handleChange = (index: number, value: string) => {
     const updated = [...formData];
@@ -44,6 +73,7 @@ export default function HomePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setElapsedSeconds(0);
     setLoading(true);
     setImageUrl('');
     setError('');
@@ -73,6 +103,28 @@ export default function HomePage() {
 
   return (
     <main className="container py-5">
+      {loading && (
+        <div className={styles.waitingOverlay} role="dialog" aria-modal="true" aria-labelledby="waiting-title">
+          <div className={styles.waitingModal}>
+            <div className={styles.orbit} aria-hidden="true">
+              <span className={styles.orbitCore} />
+            </div>
+            <p className={styles.eyebrow}>Atelier in session</p>
+            <h2 id="waiting-title" className={styles.waitingTitle}>Your vision is in the studio</h2>
+            <p className={styles.waitingMessage} aria-live="polite">
+              {waitingMessages[Math.min(Math.floor(elapsedSeconds / 8), waitingMessages.length - 1)]}
+            </p>
+            <div className={styles.timer} aria-label={`${elapsedSeconds} seconds elapsed`}>
+              <span>Studio time</span>
+              <strong>{formatElapsedTime(elapsedSeconds)}</strong>
+            </div>
+            <div className={styles.progressTrack} aria-hidden="true">
+              <span />
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="text-center mb-5">
         <h1 className="display-4 fw-bold">
           🎨 Test Your AI Image Prompt v{packageJson.version}

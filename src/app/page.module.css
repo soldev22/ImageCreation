@@ -177,6 +177,7 @@ a.secondary {
   background:
     linear-gradient(rgba(13, 18, 24, 0.86), rgba(13, 18, 24, 0.94)),
     repeating-linear-gradient(135deg, transparent 0 24px, rgba(255, 255, 255, 0.025) 24px 25px);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   animation: overlayIn 240ms ease-out both;
 }

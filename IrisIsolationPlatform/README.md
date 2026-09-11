@@ -1,6 +1,6 @@
 # Iris Isolation Platform
 
-A full-stack iris segmentation platform with a React workbench, FastAPI REST API, OpenCV and optional U-Net processors, PostgreSQL metadata, Azure Blob Storage, Docker, and Azure Container Apps infrastructure.
+A full-stack iris segmentation platform with a React workbench, FastAPI REST API, OpenCV and optional U-Net processors, plus deployment support for Vercel and Azure Container Apps.
 
 ## Repository
 
@@ -75,6 +75,27 @@ $password = Read-Host "PostgreSQL administrator password" -AsSecureString
 ```
 
 The checked-in parameters file contains a non-secret deployment placeholder. The script overrides it and never writes the supplied password to disk. After deployment, configure the production JWT issuer/audience and update CORS to the emitted web URL.
+
+## Vercel Deployment
+
+The root `vercel.json` deploys the Vite frontend and FastAPI backend as Vercel Services under one domain. Requests below `/api/` are routed to a stateless Python Function; all other requests are served by Vite. This deployment path does not persist source images, results, metadata, or audit records.
+
+Requirements:
+
+- A Vercel plan with Services access.
+- Vercel CLI 48.1.8 or newer when deploying from a terminal.
+- Uploaded files and generated PNGs must each remain at or below 4 MB because Vercel Functions have a 4.5 MB request and response payload limit.
+- Enable Large Functions if the OpenCV dependency bundle exceeds the standard 500 MB uncompressed function limit during the first cloud build.
+
+Deploy from this directory:
+
+```powershell
+npx vercel login
+npx vercel
+npx vercel --prod
+```
+
+No database or Blob Storage environment variables are required for the stateless Vercel workflow. To require bearer authentication, set `IRIS_AUTH_MODE=production` and configure the JWT settings before exposing the API; otherwise protect the processing endpoint with Vercel Firewall rate limits.
 
 ## Validation
 

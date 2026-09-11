@@ -6,6 +6,7 @@ from time import monotonic
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.isolation import router as isolation_router
 from app.api.routes import router
 from app.core.config import get_settings
 from app.infrastructure.database import initialize_database
@@ -21,7 +22,19 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="Iris Isolation API", version="0.1.0", lifespan=lifespan)
-app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins, allow_credentials=False, allow_methods=["GET", "POST"], allow_headers=["Authorization", "Content-Type", "X-Correlation-ID"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type", "X-Correlation-ID"],
+    expose_headers=[
+        "X-Image-Id",
+        "X-Image-Width",
+        "X-Image-Height",
+        "X-Confidence-Score",
+    ],
+)
 
 
 @app.middleware("http")
@@ -48,3 +61,4 @@ async def secure_headers(request: Request, call_next):
 
 
 app.include_router(router)
+app.include_router(isolation_router)

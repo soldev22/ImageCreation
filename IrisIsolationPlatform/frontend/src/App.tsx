@@ -6,7 +6,7 @@ import { processImage } from './api/client'
 import type { ProcessingMethod, SegmentationResult } from './types/images'
 import './App.css'
 
-const MAX_FILE_BYTES = 10 * 1024 * 1024
+const MAX_FILE_BYTES = 4 * 1024 * 1024
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => localStorage.getItem('iris-theme') === 'dark' ? 'dark' : 'light')
@@ -44,7 +44,7 @@ export default function App() {
     onDrop: (acceptedFiles, rejectedFiles) => {
       if (rejectedFiles.length) {
         const oversized = rejectedFiles[0].errors.some(({ code }) => code === 'file-too-large')
-        setError(oversized ? 'Image must be 10 MB or smaller.' : 'Choose a JPEG, PNG, or WebP image.')
+        setError(oversized ? 'Image must be 4 MB or smaller.' : 'Choose a JPEG, PNG, or WebP image.')
       } else if (acceptedFiles[0]) selectFile(acceptedFiles[0])
     },
   })
@@ -93,7 +93,7 @@ export default function App() {
             <div className="step-heading"><span>01</span><div><h2>Source image</h2><p>One eye, clearly photographed</p></div></div>
             <div {...getRootProps({ className: `dropzone ${isDragActive ? 'is-active' : ''} ${file ? 'has-file' : ''}` })}>
               <input {...getInputProps()} />
-              {file && previewUrl ? <div className="file-preview"><img src={previewUrl} alt="Selected eye" /><div><strong>{file.name}</strong><span>{(file.size / 1024 / 1024).toFixed(2)} MB</span></div><button type="button" onClick={(event) => { event.stopPropagation(); clearFile() }} aria-label="Remove selected image"><X size={17} /></button></div> : <><ImagePlus size={28} /><strong>{isDragActive ? 'Release to examine' : 'Drop an eye photograph'}</strong><span>or click to browse</span><small>JPEG, PNG or WebP · max 10 MB</small></>}
+              {file && previewUrl ? <div className="file-preview"><img src={previewUrl} alt="Selected eye" /><div><strong>{file.name}</strong><span>{(file.size / 1024 / 1024).toFixed(2)} MB</span></div><button type="button" onClick={(event) => { event.stopPropagation(); clearFile() }} aria-label="Remove selected image"><X size={17} /></button></div> : <><ImagePlus size={28} /><strong>{isDragActive ? 'Release to examine' : 'Drop an eye photograph'}</strong><span>or click to browse</span><small>JPEG, PNG or WebP · max 4 MB</small></>}
             </div>
             {file && <button className="text-action" type="button" onClick={open}><Upload size={15} /> Choose another image</button>}
             <div className="divider" />

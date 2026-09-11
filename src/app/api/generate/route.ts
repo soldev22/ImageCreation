@@ -60,13 +60,19 @@ export async function POST(req: Request) {
     const imageArgs = JSON.parse(toolCall?.function.arguments || '{}');
 
     const imageResponse = await openai.images.generate({
-      model: 'dall-e-3',
+      model: 'gpt-image-1',
       prompt: imageArgs.prompt,
       size: imageArgs.size,
       user: 'user-ai-tester',
     });
 
-    const imageUrl = imageResponse.data?.[0]?.url;
+    const generatedImage = imageResponse.data?.[0];
+    const imageUrl = generatedImage?.url ??
+      (generatedImage?.b64_json ? `data:image/png;base64,${generatedImage.b64_json}` : undefined);
+
+    if (!imageUrl) {
+      throw new Error('OpenAI returned no generated image');
+    }
 
     return NextResponse.json({ imageUrl });
   } catch (err: any) {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import packageJson from '../../package.json';
 
 const questions = [
   'What place or environment feels most like “home” to you?',
@@ -33,6 +34,7 @@ export default function HomePage() {
   const [formData, setFormData] = useState<string[]>(defaultAnswers);
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
+  const [error, setError] = useState('');
 
   const handleChange = (index: number, value: string) => {
     const updated = [...formData];
@@ -44,22 +46,37 @@ export default function HomePage() {
     e.preventDefault();
     setLoading(true);
     setImageUrl('');
+    setError('');
 
-    const response = await fetch('/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ answers: formData }),
-    });
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answers: formData }),
+      });
 
-    const data = await response.json();
-    setImageUrl(data.imageUrl);
-    setLoading(false);
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || typeof data.imageUrl !== 'string' || !data.imageUrl) {
+        throw new Error(
+          typeof data.error === 'string' ? data.error : 'Image generation failed. Please try again.'
+        );
+      }
+
+      setImageUrl(data.imageUrl);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Image generation failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <main className="container py-5">
       <div className="text-center mb-5">
-        <h1 className="display-4 fw-bold">🎨 Test Your AI Image Prompt</h1>
+        <h1 className="display-4 fw-bold">
+          🎨 Test Your AI Image Prompt v{packageJson.version}
+        </h1>
         <p className="lead">Auto-filled answers to speed up testing.</p>
       </div>
 
@@ -82,6 +99,12 @@ export default function HomePage() {
           {loading ? 'Generating...' : 'Generate Image'}
         </button>
       </form>
+
+      {error && (
+        <div className="alert alert-danger mt-4" role="alert">
+          {error}
+        </div>
+      )}
 
       {imageUrl && (
         <div className="text-center mt-5">

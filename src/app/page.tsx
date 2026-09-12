@@ -50,6 +50,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [error, setError] = useState('');
+  const [downloadError, setDownloadError] = useState('');
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   useEffect(() => {
@@ -98,6 +99,33 @@ export default function HomePage() {
       setError(err instanceof Error ? err.message : 'Image generation failed. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!imageUrl) {
+      return;
+    }
+
+    setDownloadError('');
+
+    try {
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error('The generated image could not be downloaded.');
+      }
+
+      const imageBlob = await response.blob();
+      const downloadUrl = URL.createObjectURL(imageBlob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = 'generated-image.png';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(downloadUrl);
+    } catch {
+      setDownloadError('The generated image could not be downloaded. Please try again.');
     }
   };
 
@@ -162,6 +190,16 @@ export default function HomePage() {
         <div className="text-center mt-5">
           <h2 className="h4 mb-3">🖼️ Your Generated Image</h2>
           <img src={imageUrl} alt="Generated Art" className="img-fluid rounded shadow" />
+          <div className="mt-4">
+            <button type="button" className="btn btn-outline-primary" onClick={handleDownload}>
+              Download Image
+            </button>
+          </div>
+          {downloadError && (
+            <div className="alert alert-warning mt-3" role="alert">
+              {downloadError}
+            </div>
+          )}
         </div>
       )}
     </main>
